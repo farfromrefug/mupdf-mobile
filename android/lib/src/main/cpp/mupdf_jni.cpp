@@ -77,7 +77,7 @@ struct AnnotHandle {
 
 #define DOC(h)  (reinterpret_cast<DocHandle *>(static_cast<uintptr_t>(h)))
 #define PAGE(h) (reinterpret_cast<PageHandle *>(static_cast<uintptr_t>(h)))
-#define ANNOT(h)(reinterpret_cast<AnnotHandle *>(static_cast<uintptr_t>(h)))
+#define ANNOT(h) (reinterpret_cast<AnnotHandle *>(static_cast<uintptr_t>(h)))
 
 // Recursively walk fz_outline tree, appending "depth\ttitle\tpageIndex" entries.
 static void walkOutline(fz_context *ctx, fz_outline *node, int depth,
@@ -682,9 +682,7 @@ Java_com_artifex_mupdf_mobile_MuPDFPage_nativeGetTextContent(
         fz_stext_page *stext = fz_new_stext_page_from_page(ph->ctx, ph->page, &opts);
         fz_buffer *buf = fz_new_buffer_from_stext_page(ph->ctx, stext);
         fz_drop_stext_page(ph->ctx, stext);
-        size_t len = 0;
         const char *str = reinterpret_cast<const char *>(fz_string_from_buffer(ph->ctx, buf));
-        (void)len;
         result = env->NewStringUTF(str ? str : "");
         fz_drop_buffer(ph->ctx, buf);
     }

@@ -157,7 +157,7 @@ open class MuPDFPage internal constructor(
         val floats = nativeSearch(nativeHandle, text)
         val result = mutableListOf<MuPDFRect>()
         var i = 0
-        while (i + 3 < floats.size) {
+        while (i + 4 <= floats.size) {
             result.add(MuPDFRect(floats[i], floats[i + 1],
                                  floats[i + 2] - floats[i], floats[i + 3] - floats[i + 1]))
             i += 4
