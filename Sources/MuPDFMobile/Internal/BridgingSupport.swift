@@ -58,6 +58,7 @@ func annotationTypeToMuPDF(_ type: MuPDFAnnotationType) -> Int32 {
     case .strikeout:   return 18
     case .stamp:       return 20
     case .redact:      return 24
+    case .link:        return 1
     }
 }
 
