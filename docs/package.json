@@ -1,5 +1,5 @@
 {
-  "name": "mupdf-mobile-docs",
+  "name": "docs",
   "version": "1.0.0",
   "description": "VitePress documentation for MuPDF Mobile",
   "scripts": {

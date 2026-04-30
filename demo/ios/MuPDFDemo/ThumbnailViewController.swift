@@ -142,7 +142,9 @@ private final class ThumbnailCell: UICollectionViewCell {
             guard let self else { return }
             let bitmap: MuPDFBitmap? = await Task.detached(priority: .userInitiated) {
                 guard let page = try? document.loadPage(at: pageIndex) else { return nil }
-                return page.render(scale: 0.3)
+                let result = page.render(scale: 0.3)
+                page.invalidate()
+                return result
             }.value
             await MainActor.run {
                 guard !Task.isCancelled else { return }

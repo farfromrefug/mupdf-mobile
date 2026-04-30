@@ -93,9 +93,13 @@ final class AnnotationViewController: UIViewController {
             let page = try? self.document.loadPage(at: index)
             let bitmap = page?.render(scale: 1.5)
             let annots = page?.annotations() ?? []
-            self.currentPage = page
             DispatchQueue.main.async {
+                // Release the previous page before replacing
+                self.currentPage?.invalidate()
+                self.currentPage = page
+                #if canImport(UIKit)
                 self.pageImageView.image = bitmap?.image
+                #endif
                 self.annotations = annots
                 self.tableView.reloadData()
             }

@@ -143,6 +143,10 @@ class MuPDFSaveException(path: String, cause: Throwable? = null) :
 class MuPDFDocumentClosedException :
     MuPDFException("The document has been closed")
 
+/** Thrown when the underlying MuPDF engine encounters a fatal error. */
+class MuPDFEngineException(message: String, cause: Throwable? = null) :
+    MuPDFException("MuPDF error: $message", cause)
+
 /**
  * A single entry in a PDF's table of contents (outline / bookmark).
  *

@@ -91,6 +91,8 @@ class AnnotationActivity : AppCompatActivity() {
             val bitmap = runCatching { page.render(1.5f) }.getOrNull()
             val annots = runCatching { page.annotations() }.getOrElse { emptyList() }
             withContext(Dispatchers.Main) {
+                // Close the previous page before replacing it
+                currentPage?.close()
                 currentPage = page
                 pageImageView.setImageBitmap(bitmap?.bitmap)
                 annotations.clear()

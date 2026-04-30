@@ -68,7 +68,9 @@ class ThumbnailAdapter(
             val bitmap = withContext(Dispatchers.IO) {
                 runCatching {
                     val page = document.loadPage(position)
-                    MuPDFRenderer.render(page, 0.3f)
+                    val result = MuPDFRenderer.render(page, 0.3f)
+                    page.close()
+                    result
                 }.getOrNull()
             }
             holder.imageView.setImageBitmap(bitmap?.bitmap)
