@@ -1,15 +1,8 @@
 import UIKit
 import MuPDFMobile
 
-/// A simple single-page PDF viewer backed by `MuPDFDocument`.
-///
-/// Displays one page at a time with a scroll view for pan/zoom and
-/// a page-number toolbar at the bottom.
+/// A single-page PDF viewer with navigation, thumbnail gallery, and annotation support.
 final class PDFViewerViewController: UIViewController {
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // MARK: Dependencies
-    // ─────────────────────────────────────────────────────────────────────────
 
     private let document: MuPDFDocument
     private var currentPageIndex: Int = 0
@@ -22,9 +15,7 @@ final class PDFViewerViewController: UIViewController {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // MARK: UI
-    // ─────────────────────────────────────────────────────────────────────────
+    // MARK: - UI
 
     private lazy var scrollView: UIScrollView = {
         let sv = UIScrollView()
@@ -60,9 +51,7 @@ final class PDFViewerViewController: UIViewController {
         return lbl
     }()
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // MARK: Lifecycle
-    // ─────────────────────────────────────────────────────────────────────────
+    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,6 +79,13 @@ final class PDFViewerViewController: UIViewController {
             toolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
 
+        navigationItem.rightBarButtonItems = [
+            UIBarButtonItem(image: UIImage(systemName: "pencil.and.outline"),
+                            style: .plain, target: self, action: #selector(showAnnotations)),
+            UIBarButtonItem(image: UIImage(systemName: "square.grid.2x2"),
+                            style: .plain, target: self, action: #selector(showThumbnails)),
+        ]
+
         setupToolbar()
         renderCurrentPage()
     }
@@ -98,26 +94,19 @@ final class PDFViewerViewController: UIViewController {
         document.close()
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // MARK: Private helpers
-    // ─────────────────────────────────────────────────────────────────────────
+    // MARK: - Private helpers
 
     private func setupToolbar() {
         let prevBtn = UIBarButtonItem(
             image: UIImage(systemName: "chevron.left"),
-            style: .plain,
-            target: self,
-            action: #selector(previousPage)
+            style: .plain, target: self, action: #selector(previousPage)
         )
         let nextBtn = UIBarButtonItem(
             image: UIImage(systemName: "chevron.right"),
-            style: .plain,
-            target: self,
-            action: #selector(nextPage)
+            style: .plain, target: self, action: #selector(nextPage)
         )
         let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let pageLabelItem = UIBarButtonItem(customView: pageLabel)
-
         toolbar.items = [prevBtn, spacer, pageLabelItem, spacer, nextBtn]
         updatePageLabel()
     }
@@ -145,9 +134,7 @@ final class PDFViewerViewController: UIViewController {
         pageLabel.text = "\(currentPageIndex + 1) / \(document.pageCount)"
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // MARK: Actions
-    // ─────────────────────────────────────────────────────────────────────────
+    // MARK: - Actions
 
     @objc private func previousPage() {
         guard currentPageIndex > 0 else { return }
@@ -159,6 +146,19 @@ final class PDFViewerViewController: UIViewController {
         guard currentPageIndex < document.pageCount - 1 else { return }
         currentPageIndex += 1
         renderCurrentPage()
+    }
+
+    @objc private func showThumbnails() {
+        let vc = ThumbnailViewController(document: document) { [weak self] index in
+            self?.currentPageIndex = index
+            self?.renderCurrentPage()
+        }
+        navigationController?.pushViewController(vc, animated: true)
+    }
+
+    @objc private func showAnnotations() {
+        let vc = AnnotationViewController(document: document)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 

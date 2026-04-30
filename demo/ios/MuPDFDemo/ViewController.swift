@@ -1,98 +1,90 @@
 import UIKit
 import MuPDFMobile
 
-/// Root view controller that provides a button to open the bundled sample PDF.
+/// Root view controller — file picker landing screen.
 final class ViewController: UIViewController {
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // MARK: UI
-    // ─────────────────────────────────────────────────────────────────────────
+    private let pickPdf = UIDocumentPickerViewController(
+        forOpeningContentTypes: [.pdf],
+        asCopy: true
+    )
 
-    private lazy var openButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        config.title        = "Open Sample PDF"
-        config.image        = UIImage(systemName: "doc.fill")
-        config.imagePadding = 8
-        let btn = UIButton(configuration: config)
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.addTarget(self, action: #selector(openSamplePDF), for: .touchUpInside)
-        return btn
+    private lazy var stackView: UIStackView = {
+        let sv = UIStackView()
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        sv.axis    = .vertical
+        sv.spacing = 16
+        sv.alignment = .center
+        return sv
     }()
-
-    private lazy var infoLabel: UILabel = {
-        let lbl = UILabel()
-        lbl.translatesAutoresizingMaskIntoConstraints = false
-        lbl.text          = "MuPDF Mobile Demo"
-        lbl.font          = .preferredFont(forTextStyle: .title2)
-        lbl.textAlignment = .center
-        lbl.numberOfLines = 0
-        return lbl
-    }()
-
-    private lazy var subtitleLabel: UILabel = {
-        let lbl = UILabel()
-        lbl.translatesAutoresizingMaskIntoConstraints = false
-        lbl.text          = "Cross-platform PDF rendering powered by MuPDF"
-        lbl.font          = .preferredFont(forTextStyle: .subheadline)
-        lbl.textColor     = .secondaryLabel
-        lbl.textAlignment = .center
-        lbl.numberOfLines = 0
-        return lbl
-    }()
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // MARK: Lifecycle
-    // ─────────────────────────────────────────────────────────────────────────
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "MuPDF Demo"
+        title = "MuPDF Mobile Demo"
         view.backgroundColor = .systemBackground
+        pickPdf.delegate = self
 
-        view.addSubview(infoLabel)
-        view.addSubview(subtitleLabel)
-        view.addSubview(openButton)
-
+        view.addSubview(stackView)
         NSLayoutConstraint.activate([
-            infoLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            infoLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -60),
-            infoLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            infoLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-
-            subtitleLabel.topAnchor.constraint(equalTo: infoLabel.bottomAnchor, constant: 8),
-            subtitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            subtitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-
-            openButton.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 32),
-            openButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            openButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 220),
-            openButton.heightAnchor.constraint(equalToConstant: 50),
+            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            stackView.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 32),
+            stackView.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -32),
         ])
+
+        let label = UILabel()
+        label.text = "MuPDF Mobile Demo"
+        label.font = .systemFont(ofSize: 24, weight: .bold)
+
+        let subtitle = UILabel()
+        subtitle.text = "Cross-platform PDF rendering"
+        subtitle.font = .systemFont(ofSize: 15)
+        subtitle.textColor = .secondaryLabel
+
+        let openBtn = makeButton(title: "📂  Open PDF", action: #selector(pickDocument))
+
+        stackView.addArrangedSubview(label)
+        stackView.addArrangedSubview(subtitle)
+        stackView.setCustomSpacing(32, after: subtitle)
+        stackView.addArrangedSubview(openBtn)
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // MARK: Actions
-    // ─────────────────────────────────────────────────────────────────────────
+    @objc private func pickDocument() {
+        present(pickPdf, animated: true)
+    }
 
-    @objc private func openSamplePDF() {
-        guard let pdfURL = Bundle.main.url(forResource: "sample", withExtension: "pdf") else {
-            showAlert(title: "No PDF found",
-                      message: "Add a 'sample.pdf' to the app bundle to try the viewer.")
-            return
-        }
+    private func makeButton(title: String, action: Selector) -> UIButton {
+        let btn = UIButton(type: .system)
+        btn.setTitle(title, for: .normal)
+        btn.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        btn.contentEdgeInsets = UIEdgeInsets(top: 12, left: 24, bottom: 12, right: 24)
+        btn.backgroundColor  = .systemIndigo
+        btn.setTitleColor(.white, for: .normal)
+        btn.layer.cornerRadius = 10
+        btn.addTarget(self, action: action, for: .touchUpInside)
+        return btn
+    }
+}
 
+// MARK: - UIDocumentPickerDelegate
+
+extension ViewController: UIDocumentPickerDelegate {
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let url = urls.first else { return }
+        openDocument(at: url)
+    }
+
+    private func openDocument(at url: URL) {
+        guard url.startAccessingSecurityScopedResource() else { return }
+        defer { url.stopAccessingSecurityScopedResource() }
         do {
-            let doc = try MuPDFDocument.open(path: pdfURL.path)
+            let doc = try MuPDFDocument.open(path: url.path)
             let viewer = PDFViewerViewController(document: doc)
             navigationController?.pushViewController(viewer, animated: true)
         } catch {
-            showAlert(title: "Error", message: error.localizedDescription)
+            let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
         }
-    }
-
-    private func showAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
     }
 }

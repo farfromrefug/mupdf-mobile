@@ -235,6 +235,22 @@ public final class MuPDFDocument: NSObject {
     }
 
     // -------------------------------------------------------------------------
+    // MARK: Outline (Table of Contents)
+    // -------------------------------------------------------------------------
+
+    /// Returns the document's table of contents (outline) as a tree of
+    /// ``MuPDFOutlineItem`` nodes. Returns an empty array if the document
+    /// has no outline or is closed.
+    public func outline() -> [MuPDFOutlineItem] {
+        guard !isClosed else { return [] }
+        // TODO: (requires mupdf submodule)
+        //   let ctx = MuPDFContext.shared.ctx
+        //   guard let root = fz_load_outline(ctx, nativeDoc) else { return [] }
+        //   return buildOutline(root)
+        return []
+    }
+
+    // -------------------------------------------------------------------------
     // MARK: Close / release
     // -------------------------------------------------------------------------
 

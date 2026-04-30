@@ -1,11 +1,13 @@
 package com.example.mupdfmobile.demo
 
-import android.graphics.Bitmap
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import android.view.Gravity
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.artifex.mupdf.mobile.MuPDFDocument
@@ -15,10 +17,8 @@ import java.io.FileOutputStream
 import kotlinx.coroutines.*
 
 /**
- * A minimal PDF viewer Activity that renders pages using [MuPDFDocument].
- *
- * Receives a `content://` URI or file path via [EXTRA_PDF_URI] and renders
- * pages one at a time with Previous / Next navigation.
+ * Full-page PDF viewer with Previous/Next navigation, thumbnail gallery, and
+ * annotation support.
  */
 class PDFViewerActivity : AppCompatActivity() {
 
@@ -28,18 +28,26 @@ class PDFViewerActivity : AppCompatActivity() {
 
     private var document: MuPDFDocument? = null
     private var currentPage = 0
+    private var cachedPath: String? = null
 
     private lateinit var imageView: ImageView
     private lateinit var pageLabel: TextView
     private lateinit var prevBtn: Button
     private lateinit var nextBtn: Button
 
+    private val thumbnailLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val index = result.data?.getIntExtra(ThumbnailActivity.RESULT_PAGE_INDEX, 0) ?: 0
+            renderPage(index)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         setContentView(root)
 
         imageView = ImageView(this).apply {
@@ -48,32 +56,40 @@ class PDFViewerActivity : AppCompatActivity() {
             setBackgroundColor(android.graphics.Color.LTGRAY)
         }
 
-        val toolbar = LinearLayout(this).apply {
+        val navBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity     = Gravity.CENTER_VERTICAL
             setPadding(8, 8, 8, 8)
             layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         }
 
-        prevBtn = Button(this).apply { text = "◀ Prev"; setOnClickListener { navigate(-1) } }
-        nextBtn = Button(this).apply { text = "Next ▶"; setOnClickListener { navigate(+1) } }
+        prevBtn   = Button(this).apply { text = "◀"; setOnClickListener { navigate(-1) } }
+        nextBtn   = Button(this).apply { text = "▶"; setOnClickListener { navigate(+1) } }
         pageLabel = TextView(this).apply {
             layoutParams = LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f)
             gravity = Gravity.CENTER
         }
-
-        toolbar.addView(prevBtn)
-        toolbar.addView(pageLabel)
-        toolbar.addView(nextBtn)
-
-        root.addView(imageView)
-        root.addView(toolbar)
-
-        val uriString = intent.getStringExtra(EXTRA_PDF_URI) ?: run {
-            showError("No PDF URI provided")
-            return
+        val thumbBtn = Button(this).apply {
+            text = "⊞"
+            setOnClickListener { openThumbnails() }
+        }
+        val annotBtn = Button(this).apply {
+            text = "✏"
+            setOnClickListener { openAnnotations() }
         }
 
+        navBar.addView(prevBtn)
+        navBar.addView(pageLabel)
+        navBar.addView(nextBtn)
+        navBar.addView(thumbBtn)
+        navBar.addView(annotBtn)
+
+        root.addView(imageView)
+        root.addView(navBar)
+
+        val uriString = intent.getStringExtra(EXTRA_PDF_URI) ?: run {
+            showError("No PDF URI provided"); return
+        }
         openDocument(uriString)
     }
 
@@ -86,6 +102,7 @@ class PDFViewerActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val path = resolveToPath(uriString)
+                cachedPath = path
                 val doc = MuPDFDocument.open(path)
                 withContext(Dispatchers.Main) {
                     document = doc
@@ -124,7 +141,20 @@ class PDFViewerActivity : AppCompatActivity() {
         if (next in 0 until doc.pageCount) renderPage(next)
     }
 
-    /** Copies a content:// URI to a temporary file and returns its path. */
+    private fun openThumbnails() {
+        val path = cachedPath ?: return
+        val intent = Intent(this, ThumbnailActivity::class.java)
+            .putExtra(ThumbnailActivity.EXTRA_PDF_PATH, path)
+        thumbnailLauncher.launch(intent)
+    }
+
+    private fun openAnnotations() {
+        val path = cachedPath ?: return
+        val intent = Intent(this, AnnotationActivity::class.java)
+            .putExtra(AnnotationActivity.EXTRA_PDF_PATH, path)
+        startActivity(intent)
+    }
+
     private fun resolveToPath(uriString: String): String {
         if (!uriString.startsWith("content://")) return uriString
         val uri = android.net.Uri.parse(uriString)
