@@ -1,5 +1,4 @@
 import Foundation
-import CoreGraphics
 
 // MARK: - C ↔ Swift type helpers
 
@@ -82,9 +81,12 @@ func annotationTypeFromMuPDF(_ raw: Int32) -> MuPDFAnnotationType {
 }
 
 // MARK: - CGSize helper
+#if canImport(CoreGraphics)
+import CoreGraphics
 
 extension CGSize {
     init(width: Float, height: Float) {
         self.init(width: CGFloat(width), height: CGFloat(height))
     }
 }
+#endif

@@ -1,6 +1,6 @@
 package com.artifex.mupdf.mobile
 
-import android.graphics.SizeF
+import android.util.SizeF
 import java.io.File
 
 /**

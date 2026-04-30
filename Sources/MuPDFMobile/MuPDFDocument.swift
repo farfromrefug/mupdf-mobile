@@ -1,5 +1,7 @@
 import Foundation
+#if canImport(CoreGraphics)
 import CoreGraphics
+#endif
 
 // MARK: - MuPDFDocument
 
@@ -14,7 +16,10 @@ import CoreGraphics
 /// ## Memory management
 /// Call ``close()`` to release native resources as soon as the document is no
 /// longer needed. The ARC destructor also calls `close()` as a safety net.
-@objc public final class MuPDFDocument: NSObject {
+#if canImport(ObjectiveC)
+@objcMembers
+#endif
+public final class MuPDFDocument: NSObject {
 
     // -------------------------------------------------------------------------
     // MARK: Private state
@@ -50,7 +55,7 @@ import CoreGraphics
     /// - Returns: An initialised `MuPDFDocument`.
     /// - Throws: `MuPDFError.fileNotFound` if the path does not exist.
     ///           `MuPDFError.invalidDocument` if the file cannot be parsed.
-    @objc public static func open(path: String) throws -> MuPDFDocument {
+    public static func open(path: String) throws -> MuPDFDocument {
         guard FileManager.default.fileExists(atPath: path) else {
             throw MuPDFError.fileNotFound
         }
@@ -73,7 +78,7 @@ import CoreGraphics
     /// - Parameter data: The raw bytes of a PDF (or other supported format).
     /// - Returns: An initialised `MuPDFDocument`.
     /// - Throws: `MuPDFError.invalidDocument` if the data cannot be parsed.
-    @objc public static func open(data: Data) throws -> MuPDFDocument {
+    public static func open(data: Data) throws -> MuPDFDocument {
         guard !data.isEmpty else { throw MuPDFError.invalidDocument }
 
         // TODO: (requires mupdf submodule)
@@ -94,21 +99,21 @@ import CoreGraphics
     // -------------------------------------------------------------------------
 
     /// The total number of pages in the document.
-    @objc public var pageCount: Int {
+    public var pageCount: Int {
         guard !isClosed else { return 0 }
         // TODO: return Int(fz_count_pages(MuPDFContext.shared.ctx, nativeDoc))
         return 0
     }
 
     /// The document's title metadata, if present.
-    @objc public var title: String? {
+    public var title: String? {
         guard !isClosed else { return nil }
         // TODO: return metadata(key: "info:Title")
         return nil
     }
 
     /// The document's author metadata, if present.
-    @objc public var author: String? {
+    public var author: String? {
         guard !isClosed else { return nil }
         // TODO: return metadata(key: "info:Author")
         return nil
@@ -124,7 +129,7 @@ import CoreGraphics
     /// - Returns: The loaded ``MuPDFPage``.
     /// - Throws: `MuPDFError.documentClosed` or
     ///           `MuPDFError.pageIndexOutOfBounds`.
-    @objc public func loadPage(at index: Int) throws -> MuPDFPage {
+    public func loadPage(at index: Int) throws -> MuPDFPage {
         guard !isClosed else { throw MuPDFError.documentClosed }
         guard index >= 0 && index < pageCount else {
             throw MuPDFError.pageIndexOutOfBounds
@@ -145,11 +150,13 @@ import CoreGraphics
     ///
     /// - Parameter index: Zero-based page index.
     /// - Returns: The page size as a `CGSize`.
-    @objc public func pageSize(at index: Int) -> CGSize {
+#if canImport(CoreGraphics)
+    public func pageSize(at index: Int) -> CGSize {
         guard !isClosed, index >= 0, index < pageCount else { return .zero }
         // TODO: use fz_bound_page after loading
         return .zero
     }
+#endif
 
     // -------------------------------------------------------------------------
     // MARK: Save
@@ -159,7 +166,7 @@ import CoreGraphics
     ///
     /// - Parameter path: The destination file path.
     /// - Throws: `MuPDFError.documentClosed` or `MuPDFError.saveFailed`.
-    @objc public func save(to path: String) throws {
+    public func save(to path: String) throws {
         guard !isClosed else { throw MuPDFError.documentClosed }
         guard !path.isEmpty else { throw MuPDFError.saveFailed }
 
@@ -177,7 +184,7 @@ import CoreGraphics
     ///
     /// - Parameter document: The source document to merge from.
     /// - Throws: `MuPDFError.documentClosed` or `MuPDFError.mupdfError`.
-    @objc public func merge(document: MuPDFDocument) throws {
+    public func merge(document: MuPDFDocument) throws {
         guard !isClosed else { throw MuPDFError.documentClosed }
         guard !document.isClosed else { throw MuPDFError.documentClosed }
 
@@ -195,7 +202,7 @@ import CoreGraphics
     ///   - width:  Page width in PDF points (1 point = 1/72 inch).
     ///   - height: Page height in PDF points.
     /// - Throws: `MuPDFError.documentClosed` or `MuPDFError.mupdfError`.
-    @objc public func insertBlankPage(at index: Int, width: Float, height: Float) throws {
+    public func insertBlankPage(at index: Int, width: Float, height: Float) throws {
         guard !isClosed else { throw MuPDFError.documentClosed }
 
         // TODO: (requires mupdf submodule)
@@ -213,7 +220,7 @@ import CoreGraphics
     /// - Parameter indices: The set of page indices to delete.
     /// - Throws: `MuPDFError.documentClosed`, `MuPDFError.pageIndexOutOfBounds`,
     ///           or `MuPDFError.mupdfError`.
-    @objc public func deletePages(at indices: [Int]) throws {
+    public func deletePages(at indices: [Int]) throws {
         guard !isClosed else { throw MuPDFError.documentClosed }
         let sorted = indices.sorted(by: >)
         for index in sorted {
@@ -236,7 +243,7 @@ import CoreGraphics
     /// After calling `close()`, most operations will throw
     /// `MuPDFError.documentClosed`. It is safe to call `close()` multiple
     /// times.
-    @objc public func close() {
+    public func close() {
         guard !isClosed else { return }
         isClosed = true
         // TODO: (requires mupdf submodule)

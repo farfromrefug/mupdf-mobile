@@ -23,14 +23,17 @@ import Foundation
 ///
 /// try doc.save(to: outputPath)
 /// ```
-@objc public final class MuPDFEditor: NSObject {
+#if canImport(ObjectiveC)
+@objcMembers
+#endif
+public final class MuPDFEditor: NSObject {
 
     // -------------------------------------------------------------------------
     // MARK: Properties
     // -------------------------------------------------------------------------
 
     /// The document this editor is operating on.
-    @objc public private(set) weak var document: MuPDFDocument?
+    public private(set) weak var document: MuPDFDocument?
 
     // -------------------------------------------------------------------------
     // MARK: Init
@@ -39,7 +42,7 @@ import Foundation
     /// Creates an editor bound to the given document.
     ///
     /// - Parameter document: The document to edit. Must not be closed.
-    @objc public init(document: MuPDFDocument) {
+    public init(document: MuPDFDocument) {
         self.document = document
     }
 
@@ -57,7 +60,7 @@ import Foundation
     ///   - rect:  Bounding rectangle in PDF user-space points where the image
     ///            should be placed.
     /// - Throws: `MuPDFError.documentClosed` or `MuPDFError.mupdfError`.
-    @objc public func insertImage(
+    public func insertImage(
         on page: MuPDFPage,
         image: Data,
         rect: MuPDFRect
@@ -96,7 +99,7 @@ import Foundation
     ///   - page: The page containing the content to redact.
     ///   - rect: Rectangle to redact in PDF user-space points.
     /// - Throws: `MuPDFError.documentClosed` or `MuPDFError.mupdfError`.
-    @objc public func redact(page: MuPDFPage, rect: MuPDFRect) throws {
+    public func redact(page: MuPDFPage, rect: MuPDFRect) throws {
         guard document != nil else { throw MuPDFError.documentClosed }
 
         // TODO: (requires mupdf submodule)
@@ -113,7 +116,7 @@ import Foundation
     /// ⚠️ This operation is **irreversible**. Save a backup before calling.
     ///
     /// - Throws: `MuPDFError.documentClosed` or `MuPDFError.mupdfError`.
-    @objc public func applyRedactions() throws {
+    public func applyRedactions() throws {
         guard document != nil else { throw MuPDFError.documentClosed }
 
         // TODO: (requires mupdf submodule)

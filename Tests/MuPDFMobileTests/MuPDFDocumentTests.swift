@@ -91,9 +91,11 @@ final class MuPDFDocumentTests: XCTestCase {
 
     // MARK: - Page size
 
+#if canImport(CoreGraphics)
     func testPageSizeReturnsZeroForClosedDoc() throws {
         let doc = try MuPDFDocument.open(data: Data([0x25, 0x50, 0x44, 0x46]))
         doc.close()
         XCTAssertEqual(doc.pageSize(at: 0), .zero)
     }
+#endif
 }

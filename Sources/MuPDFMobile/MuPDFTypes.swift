@@ -1,28 +1,34 @@
 import Foundation
+#if canImport(CoreGraphics)
 import CoreGraphics
+#endif
 
 // MARK: - MuPDFRect
 
 /// A rectangle in PDF user-space coordinates (origin at bottom-left for PDF,
 /// but presented here in screen-space with origin at top-left for convenience).
-@objc public final class MuPDFRect: NSObject, NSCopying {
+#if canImport(ObjectiveC)
+@objcMembers
+#endif
+public final class MuPDFRect: NSObject, NSCopying {
     /// X coordinate of the top-left corner, in points.
-    @objc public var x: Float
+    public var x: Float
     /// Y coordinate of the top-left corner, in points.
-    @objc public var y: Float
+    public var y: Float
     /// Width of the rectangle, in points.
-    @objc public var width: Float
+    public var width: Float
     /// Height of the rectangle, in points.
-    @objc public var height: Float
+    public var height: Float
 
     /// Creates a new `MuPDFRect`.
-    @objc public init(x: Float, y: Float, width: Float, height: Float) {
+    public init(x: Float, y: Float, width: Float, height: Float) {
         self.x = x
         self.y = y
         self.width = width
         self.height = height
     }
 
+#if canImport(CoreGraphics)
     /// Convenience initialiser from a `CGRect`.
     public convenience init(_ rect: CGRect) {
         self.init(
@@ -37,6 +43,7 @@ import CoreGraphics
     public var cgRect: CGRect {
         CGRect(x: CGFloat(x), y: CGFloat(y), width: CGFloat(width), height: CGFloat(height))
     }
+#endif
 
     public func copy(with zone: NSZone? = nil) -> Any {
         MuPDFRect(x: x, y: y, width: width, height: height)
@@ -55,18 +62,21 @@ import CoreGraphics
 // MARK: - MuPDFColor
 
 /// An RGBA colour value. All components are in the range [0, 1].
-@objc public final class MuPDFColor: NSObject, NSCopying {
+#if canImport(ObjectiveC)
+@objcMembers
+#endif
+public final class MuPDFColor: NSObject, NSCopying {
     /// Red component in [0, 1].
-    @objc public var r: Float
+    public var r: Float
     /// Green component in [0, 1].
-    @objc public var g: Float
+    public var g: Float
     /// Blue component in [0, 1].
-    @objc public var b: Float
+    public var b: Float
     /// Alpha component in [0, 1]. 1 = fully opaque.
-    @objc public var a: Float
+    public var a: Float
 
     /// Creates a new `MuPDFColor`.
-    @objc public init(r: Float, g: Float, b: Float, a: Float = 1.0) {
+    public init(r: Float, g: Float, b: Float, a: Float = 1.0) {
         self.r = r
         self.g = g
         self.b = b
@@ -74,13 +84,13 @@ import CoreGraphics
     }
 
     /// Opaque black.
-    @objc public static let black = MuPDFColor(r: 0, g: 0, b: 0, a: 1)
+    public static let black = MuPDFColor(r: 0, g: 0, b: 0, a: 1)
     /// Opaque white.
-    @objc public static let white = MuPDFColor(r: 1, g: 1, b: 1, a: 1)
+    public static let white = MuPDFColor(r: 1, g: 1, b: 1, a: 1)
     /// Semi-transparent yellow (useful as a highlight colour).
-    @objc public static let highlightYellow = MuPDFColor(r: 1, g: 1, b: 0, a: 0.5)
+    public static let highlightYellow = MuPDFColor(r: 1, g: 1, b: 0, a: 0.5)
     /// Semi-transparent red.
-    @objc public static let highlightRed = MuPDFColor(r: 1, g: 0, b: 0, a: 0.5)
+    public static let highlightRed = MuPDFColor(r: 1, g: 0, b: 0, a: 0.5)
 
     public func copy(with zone: NSZone? = nil) -> Any {
         MuPDFColor(r: r, g: g, b: b, a: a)
@@ -94,7 +104,10 @@ import CoreGraphics
 // MARK: - MuPDFAnnotationType
 
 /// The type of a PDF annotation.
-@objc public enum MuPDFAnnotationType: Int {
+#if canImport(ObjectiveC)
+@objc
+#endif
+public enum MuPDFAnnotationType: Int {
     /// Yellow highlight over text.
     case highlight = 0
     /// Underline beneath text.
@@ -145,7 +158,10 @@ import CoreGraphics
 // MARK: - MuPDFError
 
 /// Errors thrown by the MuPDF Mobile library.
-@objc public enum MuPDFError: Int, Error {
+#if canImport(ObjectiveC)
+@objc
+#endif
+public enum MuPDFError: Int, Error {
     /// The specified file path could not be opened.
     case fileNotFound = 1
     /// The data provided is not a valid PDF.

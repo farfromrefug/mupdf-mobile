@@ -1,5 +1,4 @@
 import Foundation
-import CoreGraphics
 
 // MARK: - MuPDFPage
 
@@ -8,23 +7,26 @@ import CoreGraphics
 /// Pages are loaded on demand via ``MuPDFDocument/loadPage(at:)`` and hold a
 /// reference to the native `fz_page`. Release native resources by calling
 /// ``invalidate()`` or by letting the page object be deallocated.
-@objc public final class MuPDFPage: NSObject {
+#if canImport(ObjectiveC)
+@objcMembers
+#endif
+public final class MuPDFPage: NSObject {
 
     // -------------------------------------------------------------------------
     // MARK: Properties
     // -------------------------------------------------------------------------
 
     /// Zero-based index of this page within its parent document.
-    @objc public let index: Int
+    public let index: Int
 
     /// Width of the page in PDF points (1 pt = 1/72 inch).
-    @objc public private(set) var width: Float = 0
+    public private(set) var width: Float = 0
 
     /// Height of the page in PDF points (1 pt = 1/72 inch).
-    @objc public private(set) var height: Float = 0
+    public private(set) var height: Float = 0
 
     /// Text content of the entire page, extracted as a plain-text string.
-    @objc public var textContent: String {
+    public var textContent: String {
         guard !isInvalidated else { return "" }
         // TODO: (requires mupdf submodule)
         //   let ctx = MuPDFContext.shared.ctx
@@ -70,7 +72,7 @@ import CoreGraphics
     /// - Parameter scale: Scale factor relative to PDF points (e.g. 2.0 for
     ///   a Retina / 2× render).
     /// - Returns: A ``MuPDFBitmap`` containing the rendered pixels.
-    @objc public func render(scale: Float) -> MuPDFBitmap {
+    public func render(scale: Float) -> MuPDFBitmap {
         let pixelWidth  = Int(width  * scale)
         let pixelHeight = Int(height * scale)
         return render(width: pixelWidth, height: pixelHeight)
@@ -82,7 +84,7 @@ import CoreGraphics
     ///   - width:  Output bitmap width in pixels.
     ///   - height: Output bitmap height in pixels.
     /// - Returns: A ``MuPDFBitmap`` containing the rendered pixels.
-    @objc public func render(width: Int, height: Int) -> MuPDFBitmap {
+    public func render(width: Int, height: Int) -> MuPDFBitmap {
         guard !isInvalidated, width > 0, height > 0 else {
             return MuPDFBitmap(width: 0, height: 0)
         }
@@ -116,7 +118,7 @@ import CoreGraphics
     ///   - tileHeight: Height of the tile in pixels.
     ///   - scale:     Scale factor used when computing the pixel coordinate space.
     /// - Returns: A ``MuPDFBitmap`` containing just the tile.
-    @objc public func renderTile(
+    public func renderTile(
         x: Int, y: Int,
         tileWidth: Int, tileHeight: Int,
         scale: Float
@@ -145,7 +147,7 @@ import CoreGraphics
     // -------------------------------------------------------------------------
 
     /// Returns all annotations on this page.
-    @objc public func annotations() -> [MuPDFAnnotation] {
+    public func annotations() -> [MuPDFAnnotation] {
         guard !isInvalidated else { return [] }
         // TODO: (requires mupdf submodule)
         //   var annots: [MuPDFAnnotation] = []
@@ -166,7 +168,7 @@ import CoreGraphics
     ///   - rect: The bounding rectangle in PDF user-space points.
     /// - Returns: The newly created ``MuPDFAnnotation``.
     /// - Throws: `MuPDFError.annotationCreationFailed`.
-    @objc public func addAnnotation(
+    public func addAnnotation(
         type: MuPDFAnnotationType,
         rect: MuPDFRect
     ) throws -> MuPDFAnnotation {
@@ -188,7 +190,7 @@ import CoreGraphics
     ///
     /// - Parameter annotation: The annotation to remove.
     /// - Throws: `MuPDFError.mupdfError` if removal fails.
-    @objc public func removeAnnotation(_ annotation: MuPDFAnnotation) throws {
+    public func removeAnnotation(_ annotation: MuPDFAnnotation) throws {
         guard !isInvalidated else { throw MuPDFError.documentClosed }
 
         // TODO: (requires mupdf submodule)
@@ -204,7 +206,7 @@ import CoreGraphics
     ///
     /// - Parameter text: The string to search for (case-insensitive).
     /// - Returns: An array of ``MuPDFRect`` values, one per match quad.
-    @objc public func search(text: String) -> [MuPDFRect] {
+    public func search(text: String) -> [MuPDFRect] {
         guard !isInvalidated, !text.isEmpty else { return [] }
 
         // TODO: (requires mupdf submodule)
@@ -224,7 +226,7 @@ import CoreGraphics
     // -------------------------------------------------------------------------
 
     /// Releases the underlying native page object.
-    @objc public func invalidate() {
+    public func invalidate() {
         guard !isInvalidated else { return }
         isInvalidated = true
         // TODO: fz_drop_page(MuPDFContext.shared.ctx, nativePage)

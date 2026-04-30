@@ -4,7 +4,9 @@ import UIKit
 #elseif canImport(AppKit)
 import AppKit
 #endif
+#if canImport(CoreGraphics)
 import CoreGraphics
+#endif
 
 // MARK: - MuPDFBitmap
 
@@ -14,20 +16,23 @@ import CoreGraphics
 ///   via the ``image`` property.
 /// - On macOS the underlying image is exposed as an `NSImage` via
 ///   ``nsImage``.
-@objc public final class MuPDFBitmap: NSObject {
+#if canImport(ObjectiveC)
+@objcMembers
+#endif
+public final class MuPDFBitmap: NSObject {
 
     // -------------------------------------------------------------------------
     // MARK: Properties
     // -------------------------------------------------------------------------
 
     /// Width of the bitmap in pixels.
-    @objc public let width: Int
+    public let width: Int
 
     /// Height of the bitmap in pixels.
-    @objc public let height: Int
+    public let height: Int
 
     /// Raw RGBA pixel data (4 bytes per pixel, row-major).
-    @objc public private(set) var pixelData: Data?
+    public private(set) var pixelData: Data?
 
     // -------------------------------------------------------------------------
     // MARK: Init
@@ -58,7 +63,7 @@ import CoreGraphics
 
 #if canImport(UIKit)
     /// The rendered page as a `UIImage`. Returns `nil` for empty bitmaps.
-    @objc public var image: UIImage? {
+    public var image: UIImage? {
         guard let data = pixelData, width > 0, height > 0 else { return nil }
         return data.withUnsafeBytes { ptr -> UIImage? in
             guard let base = ptr.baseAddress else { return nil }

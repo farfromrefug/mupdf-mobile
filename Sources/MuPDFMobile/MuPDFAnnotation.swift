@@ -6,27 +6,30 @@ import Foundation
 ///
 /// After modifying any property call ``update()`` to flush the change to the
 /// underlying PDF structure.
-@objc public final class MuPDFAnnotation: NSObject {
+#if canImport(ObjectiveC)
+@objcMembers
+#endif
+public final class MuPDFAnnotation: NSObject {
 
     // -------------------------------------------------------------------------
     // MARK: Properties
     // -------------------------------------------------------------------------
 
     /// The type of this annotation.
-    @objc public private(set) var type: MuPDFAnnotationType
+    public private(set) var type: MuPDFAnnotationType
 
     /// Bounding rectangle of the annotation in PDF user-space points.
-    @objc public var rect: MuPDFRect {
+    public var rect: MuPDFRect {
         didSet { isDirty = true }
     }
 
     /// The annotation's stroke / fill colour.
-    @objc public var color: MuPDFColor {
+    public var color: MuPDFColor {
         didSet { isDirty = true }
     }
 
     /// Opacity of the annotation in [0, 1]. 1 = fully opaque.
-    @objc public var opacity: Float {
+    public var opacity: Float {
         didSet {
             opacity = min(1, max(0, opacity))
             isDirty = true
@@ -34,7 +37,7 @@ import Foundation
     }
 
     /// Text content / comment associated with the annotation.
-    @objc public var contents: String {
+    public var contents: String {
         didSet { isDirty = true }
     }
 
@@ -78,7 +81,7 @@ import Foundation
     /// Call this after modifying ``rect``, ``color``, ``opacity``, or
     /// ``contents``. Changes are not persisted to disk until
     /// ``MuPDFDocument/save(to:)`` is called.
-    @objc public func update() {
+    public func update() {
         guard isDirty else { return }
         isDirty = false
 

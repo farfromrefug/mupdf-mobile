@@ -14,7 +14,10 @@ import Foundation
 /// let bitmap = MuPDFRenderer.render(page: page, scale: UIScreen.main.scale)
 /// imageView.image = bitmap.image
 /// ```
-@objc public final class MuPDFRenderer: NSObject {
+#if canImport(ObjectiveC)
+@objcMembers
+#endif
+public final class MuPDFRenderer: NSObject {
 
     // Private — not meant to be instantiated.
     private override init() {}
@@ -31,7 +34,7 @@ import Foundation
     ///            `UIScreen.main.scale` for Retina bitmaps).
     /// - Returns: A ``MuPDFBitmap`` with dimensions
     ///            `(page.width × scale, page.height × scale)`.
-    @objc public static func render(page: MuPDFPage, scale: Float) -> MuPDFBitmap {
+    public static func render(page: MuPDFPage, scale: Float) -> MuPDFBitmap {
         page.render(scale: scale)
     }
 
@@ -42,7 +45,7 @@ import Foundation
     ///   - width:  Desired output width in pixels.
     ///   - height: Desired output height in pixels.
     /// - Returns: A ``MuPDFBitmap`` of the requested size.
-    @objc public static func render(page: MuPDFPage, width: Int, height: Int) -> MuPDFBitmap {
+    public static func render(page: MuPDFPage, width: Int, height: Int) -> MuPDFBitmap {
         page.render(width: width, height: height)
     }
 
@@ -66,7 +69,7 @@ import Foundation
     ///   - scale:      The overall scale factor of the virtual full-page
     ///                 coordinate space.
     /// - Returns: A ``MuPDFBitmap`` containing the tile pixels.
-    @objc public static func renderTile(
+    public static func renderTile(
         page: MuPDFPage,
         tileX: Int,
         tileY: Int,
@@ -89,7 +92,7 @@ import Foundation
     ///
     /// On memory-constrained devices smaller tiles reduce peak memory usage
     /// at the cost of more frequent re-renders during scrolling.
-    @objc public static var recommendedTileSize: Int {
+    public static var recommendedTileSize: Int {
 #if os(iOS)
         // 512 × 512 px tiles strike a good balance on modern iOS devices.
         return 512
