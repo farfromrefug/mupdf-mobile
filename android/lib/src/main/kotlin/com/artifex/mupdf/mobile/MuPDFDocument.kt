@@ -89,6 +89,7 @@ open class MuPDFDocument private constructor(
         @JvmStatic private external fun nativeDeletePage(docHandle: Long, index: Int)
         @JvmStatic private external fun nativeGetMetadata(docHandle: Long, key: String): String?
         @JvmStatic private external fun nativeClose(docHandle: Long)
+        @JvmStatic private external fun nativeGetOutline(docHandle: Long): Array<Any>
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -224,6 +225,17 @@ open class MuPDFDocument private constructor(
             if (index < 0 || index >= count) throw MuPDFPageOutOfBoundsException(index, count)
             if (nativeHandle != -1L) nativeDeletePage(nativeHandle, index)
         }
+    }
+
+    /**
+     * Returns the document's table of contents as a list of [MuPDFOutlineItem] roots.
+     * Returns an empty list if the document has no outline or is closed.
+     */
+    open fun outline(): List<MuPDFOutlineItem> {
+        checkNotClosed()
+        // TODO: (requires mupdf submodule)
+        //   return nativeGetOutline(nativeHandle).toOutlineTree()
+        return emptyList()
     }
 
     // ─────────────────────────────────────────────────────────────────────────

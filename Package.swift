@@ -1,5 +1,6 @@
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
+// DocC documentation: run `swift package generate-documentation` or host via GitHub Pages.
 
 import PackageDescription
 

@@ -20,6 +20,21 @@
 
 ---
 
+## Documentation
+
+Full documentation is available at **[farfromrefug.github.io/mupdf-mobile](https://farfromrefug.github.io/mupdf-mobile/)** (VitePress site — built from `docs/`).
+
+- [Getting Started](https://farfromrefug.github.io/mupdf-mobile/guide/)
+- [API Reference](https://farfromrefug.github.io/mupdf-mobile/api/document)
+
+iOS API documentation can also be generated locally with Swift DocC:
+
+```bash
+swift package generate-documentation --target MuPDFMobile
+```
+
+---
+
 ## Overview
 
 **MuPDF Mobile** is a lightweight, production-ready wrapper around the battle-tested [MuPDF](https://mupdf.com/) rendering engine by Artifex Software. It exposes an idiomatic, identical API on both iOS (Swift + Objective-C) and Android (Kotlin + JNI), making it straightforward to build cross-platform PDF viewers and editors.

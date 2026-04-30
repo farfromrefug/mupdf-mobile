@@ -143,6 +143,15 @@ class MuPDFSaveException(path: String, cause: Throwable? = null) :
 class MuPDFDocumentClosedException :
     MuPDFException("The document has been closed")
 
-/** Thrown for generic MuPDF engine errors. */
-class MuPDFEngineException(message: String, cause: Throwable? = null) :
-    MuPDFException("MuPDF error: $message", cause)
+/**
+ * A single entry in a PDF's table of contents (outline / bookmark).
+ *
+ * @property title     Display title of this entry.
+ * @property pageIndex Zero-based page index, or -1 if not a page link.
+ * @property children  Nested child entries.
+ */
+data class MuPDFOutlineItem(
+    val title: String,
+    val pageIndex: Int,
+    val children: List<MuPDFOutlineItem> = emptyList()
+)
