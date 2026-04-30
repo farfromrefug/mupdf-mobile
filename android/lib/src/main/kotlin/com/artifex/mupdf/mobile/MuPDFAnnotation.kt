@@ -7,6 +7,13 @@ package com.artifex.mupdf.mobile
  * them to the underlying PDF structure. Changes are not written to disk until
  * [MuPDFDocument.save] is called.
  *
+ * ## Lifecycle
+ * Annotations backed by a native handle (returned by [MuPDFPage.annotations] or
+ * [MuPDFPage.addAnnotation]) hold a reference-counted native resource. When an
+ * annotation is no longer needed, call [close] (or use it in a `use` block) to
+ * release the native resource promptly. A safety-net finalizer will release
+ * the handle if [close] is not called, but relying on the GC is discouraged.
+ *
  * @property type     The type of this annotation.
  * @property rect     Bounding rectangle in PDF user-space points.
  * @property color    Stroke / fill colour of the annotation.
@@ -20,9 +27,9 @@ open class MuPDFAnnotation internal constructor(
     var opacity: Float = 1f,
     var contents: String = "",
     /** Opaque handle to the native `AnnotHandle *`. -1 means not yet backed by native. */
-    internal val nativeHandle: Long = -1L,
+    internal var nativeHandle: Long = -1L,
     internal val page: MuPDFPage? = null
-) {
+) : AutoCloseable {
     init {
         require(opacity in 0f..1f) { "opacity must be in [0, 1]" }
     }
@@ -43,6 +50,26 @@ open class MuPDFAnnotation internal constructor(
             opacity,
             contents
         )
+    }
+
+    /**
+     * Releases the native AnnotHandle resource. Safe to call multiple times.
+     *
+     * After calling [close], [update] becomes a no-op. The underlying PDF
+     * annotation object itself (owned by the page) is not destroyed — only the
+     * wrapper handle is freed.
+     */
+    override fun close() {
+        val h = nativeHandle
+        if (h != -1L) {
+            nativeHandle = -1L
+            nativeDropAnnotation(h)
+        }
+    }
+
+    @Suppress("ProtectedInFinal")
+    protected fun finalize() {
+        close()
     }
 
     override fun toString(): String =

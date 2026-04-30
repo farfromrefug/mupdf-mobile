@@ -30,5 +30,10 @@
         <activity
             android:name=".AnnotationActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".TiledViewerActivity"
+            android:exported="false"
+            android:label="Tiled Viewer" />
     </application>
 </manifest>

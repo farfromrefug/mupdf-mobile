@@ -77,12 +77,17 @@ class PDFViewerActivity : AppCompatActivity() {
             text = "✏"
             setOnClickListener { openAnnotations() }
         }
+        val tiledBtn = Button(this).apply {
+            text = "🔲"
+            setOnClickListener { openTiledViewer() }
+        }
 
         navBar.addView(prevBtn)
         navBar.addView(pageLabel)
         navBar.addView(nextBtn)
         navBar.addView(thumbBtn)
         navBar.addView(annotBtn)
+        navBar.addView(tiledBtn)
 
         root.addView(imageView)
         root.addView(navBar)
@@ -152,6 +157,13 @@ class PDFViewerActivity : AppCompatActivity() {
         val path = cachedPath ?: return
         val intent = Intent(this, AnnotationActivity::class.java)
             .putExtra(AnnotationActivity.EXTRA_PDF_PATH, path)
+        startActivity(intent)
+    }
+
+    private fun openTiledViewer() {
+        val path = cachedPath ?: return
+        val intent = Intent(this, TiledViewerActivity::class.java)
+            .putExtra(TiledViewerActivity.EXTRA_PDF_PATH, path)
         startActivity(intent)
     }
 
