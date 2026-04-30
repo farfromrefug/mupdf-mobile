@@ -5,9 +5,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# MuPDF submodule path (relative to android/lib)
+# MuPDF submodule path — override with -DMUPDF_ROOT=/path/to/mupdf if needed.
+# Defaults to <repo-root>/mupdf (i.e. two levels up from android/lib).
 # ─────────────────────────────────────────────────────────────────────────────
-set(MUPDF_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../../mupdf")
+set(MUPDF_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../mupdf" CACHE PATH "Path to MuPDF submodule root")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MuPDF include directory

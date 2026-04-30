@@ -13,6 +13,7 @@
 #include <jni.h>
 #include <android/bitmap.h>
 #include <android/log.h>
+#include <cinttypes>
 #include <cstring>
 #include <cstdlib>
 #include <string>
@@ -218,7 +219,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_artifex_mupdf_mobile_MuPDFDocument_nativeClose(
         JNIEnv * /*env*/, jclass /*clazz*/, jlong docHandle) {
     if (docHandle == -1) return;
-    LOGI("nativeClose doc handle=%lld", static_cast<long long>(docHandle));
+    LOGI("nativeClose doc handle=%" PRId64, static_cast<int64_t>(docHandle));
     // TODO: fz_drop_document(ctx, doc); fz_drop_context(ctx);
 }
 
@@ -311,7 +312,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_artifex_mupdf_mobile_MuPDFPage_nativeClosePage(
         JNIEnv * /*env*/, jclass /*clazz*/, jlong pageHandle) {
     if (pageHandle == -1) return;
-    LOGI("nativeClosePage handle=%lld", static_cast<long long>(pageHandle));
+    LOGI("nativeClosePage handle=%" PRId64, static_cast<int64_t>(pageHandle));
     // TODO: fz_drop_page(ctx, page)
 }
 

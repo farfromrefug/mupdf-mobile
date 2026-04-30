@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg" alt="License: AGPL-3.0"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/platform-iOS%2015%2B-lightgrey.svg" alt="iOS 15+">
   <img src="https://img.shields.io/badge/platform-Android%2021%2B-lightgrey.svg" alt="Android 21+">
   <img src="https://img.shields.io/badge/Swift-5.9%2B-FA7343.svg" alt="Swift 5.9+">
@@ -252,6 +252,6 @@ For major changes please open an issue first to discuss what you would like to c
 
 ## License
 
-This project is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0), the same license as MuPDF itself. See [LICENSE](LICENSE) for the full text.
+This project's wrapper code is licensed under the **MIT License**. See [LICENSE](LICENSE) for the full text.
 
-For commercial licensing options (proprietary apps), please contact [Artifex Software](https://artifex.com/licensing/).
+> **Note:** The [MuPDF](https://mupdf.com/) engine itself (the `mupdf/` submodule) is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0). You must comply with the AGPL-3.0 when distributing applications that link against MuPDF. Commercial licenses are available from [Artifex Software](https://artifex.com/licensing/).

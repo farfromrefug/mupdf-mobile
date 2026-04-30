@@ -84,8 +84,8 @@ afterEvaluate {
                     url         = 'https://github.com/farfromrefug/mupdf-mobile'
                     licenses {
                         license {
-                            name = 'GNU Affero General Public License v3.0'
-                            url  = 'https://www.gnu.org/licenses/agpl-3.0.html'
+                            name = 'MIT License'
+                            url  = 'https://opensource.org/licenses/MIT'
                         }
                     }
                     developers {

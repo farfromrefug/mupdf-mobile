@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.artifex.mupdf.mobile.MuPDFDocument
 import com.artifex.mupdf.mobile.MuPDFRenderer
 import java.io.File
@@ -19,7 +20,7 @@ import kotlinx.coroutines.*
  * Receives a `content://` URI or file path via [EXTRA_PDF_URI] and renders
  * pages one at a time with Previous / Next navigation.
  */
-class PDFViewerActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+class PDFViewerActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_PDF_URI = "extra_pdf_uri"
@@ -77,13 +78,12 @@ class PDFViewerActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 
     override fun onDestroy() {
-        cancel()  // cancel coroutines
         document?.close()
         super.onDestroy()
     }
 
     private fun openDocument(uriString: String) {
-        launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val path = resolveToPath(uriString)
                 val doc = MuPDFDocument.open(path)
@@ -100,7 +100,7 @@ class PDFViewerActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private fun renderPage(index: Int) {
         val doc = document ?: return
-        launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val page   = doc.loadPage(index)
                 val scale  = resources.displayMetrics.density
