@@ -1,0 +1,105 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
+}
+
+android {
+    namespace 'com.artifex.mupdf.mobile'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 34
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17"
+                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.7.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.2.1'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Jitpack / Maven publishing
+// ─────────────────────────────────────────────────────────────────────────────
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId    = 'com.github.farfromrefug'
+                artifactId = 'mupdf-mobile'
+                version    = '1.0.0'
+
+                pom {
+                    name        = 'MuPDF Mobile'
+                    description = 'Cross-platform MuPDF wrapper for iOS and Android'
+                    url         = 'https://github.com/farfromrefug/mupdf-mobile'
+                    licenses {
+                        license {
+                            name = 'GNU Affero General Public License v3.0'
+                            url  = 'https://www.gnu.org/licenses/agpl-3.0.html'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id   = 'farfromrefug'
+                            name = 'Martin Guillon'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:github.com/farfromrefug/mupdf-mobile.git'
+                        url        = 'https://github.com/farfromrefug/mupdf-mobile'
+                    }
+                }
+            }
+        }
+    }
+}

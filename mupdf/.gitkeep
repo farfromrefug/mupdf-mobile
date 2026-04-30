@@ -1,0 +1,11 @@
+# MuPDF submodule placeholder
+
+This directory is reserved for the MuPDF git submodule.
+
+To initialise the submodule after cloning the repository, run:
+
+```bash
+git submodule update --init --recursive
+```
+
+This will clone https://github.com/ArtifexSoftware/mupdf.git into this directory.

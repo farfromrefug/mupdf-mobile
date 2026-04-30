@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MuPDF Mobile — Cross-Platform PDF Library</title>
+  <meta name="description" content="A cross-platform mobile library that wraps MuPDF for iOS (Swift/ObjC) and Android (Kotlin) with a unified API.">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="2" width="14" height="18" rx="2" fill="#4F46E5"/>
+      <rect x="8" y="2" width="9" height="18" rx="2" fill="#7C3AED" opacity=".7"/>
+      <path d="M6 8h8M6 12h6M6 16h4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    MuPDF Mobile
+  </div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#quickstart">Quick Start</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#api">API</a></li>
+    <li><a href="https://github.com/farfromrefug/mupdf-mobile">GitHub</a></li>
+  </ul>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">🚀 Open Source · AGPL-3.0</div>
+    <h1>PDF rendering for every<br>mobile platform</h1>
+    <p>
+      <strong>MuPDF Mobile</strong> wraps the battle-tested
+      <a href="https://mupdf.com/" style="color:rgba(255,255,255,.85)">MuPDF</a> engine
+      and exposes one beautiful, idiomatic API on both
+      <span style="font-weight:700">iOS (Swift)</span> and
+      <span style="font-weight:700">Android (Kotlin)</span>.
+    </p>
+    <div class="hero-buttons">
+      <a href="#install" class="btn btn-primary">📦 Get Started</a>
+      <a href="https://github.com/farfromrefug/mupdf-mobile" class="btn btn-secondary">★ Star on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ────────────────────────────────────────────────────────────── -->
+<section id="features">
+  <div class="container">
+    <p class="section-label">Why MuPDF Mobile?</p>
+    <h2 class="section-title">Everything you need to build<br>a world-class PDF viewer</h2>
+    <p class="section-subtitle">
+      From high-fidelity rendering to rich annotation editing, MuPDF Mobile has
+      you covered — without a JavaScript bridge in sight.
+    </p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#EFF6FF">📄</div>
+        <h3>High-fidelity Rendering</h3>
+        <p>Pixel-perfect page rendering at any scale using the industry-leading MuPDF C engine.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#F0FDF4">🧩</div>
+        <h3>Tiled Rendering</h3>
+        <p>Render only the tiles that are visible. Ideal for large documents in scroll views or RecyclerView.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#FFF7ED">✏️</div>
+        <h3>Annotations</h3>
+        <p>Add, edit, and remove 13 annotation types — highlights, ink, stamps, redactions, and more.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#F5F3FF">🔍</div>
+        <h3>Text Search</h3>
+        <p>Full-text search with bounding-rectangle results for precise hit-highlighting in your UI.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#FFF1F2">✂️</div>
+        <h3>Document Editing</h3>
+        <p>Merge, split, reorder pages; insert images; apply permanent redactions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#F0F9FF">🏎</div>
+        <h3>Native Performance</h3>
+        <p>Zero JS bridge. Swift on iOS and Kotlin/JNI on Android means native speed everywhere.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#ECFDF5">📦</div>
+        <h3>Easy Installation</h3>
+        <p>One line via Swift Package Manager or Jitpack/Gradle. No CocoaPods, no manual linking.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#FFFBEB">🔗</div>
+        <h3>ObjC Compatible</h3>
+        <p>Full <code>@objc</code> surface area. Works seamlessly in legacy Objective-C codebases.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Quick Start ──────────────────────────────────────────────────────────── -->
+<section id="quickstart" class="code-section">
+  <div class="container">
+    <p class="section-label">Quick Start</p>
+    <h2 class="section-title">Five lines to render a PDF</h2>
+
+    <div style="margin-top:2rem">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('swift',this)">🍎 iOS (Swift)</button>
+        <button class="tab-btn" onclick="showTab('kotlin',this)">🤖 Android (Kotlin)</button>
+      </div>
+
+      <div id="tab-swift" class="tab-content active">
+<pre><span class="kw">import</span> MuPDFMobile
+
+<span class="cmt">// 1. Open a document</span>
+<span class="kw">let</span> doc = <span class="kw">try</span> <span class="ty">MuPDFDocument</span>.<span class="fn">open</span>(path: <span class="str">"/path/to/file.pdf"</span>)
+<span class="fn">print</span>(<span class="str">"Pages: \(doc.pageCount)"</span>)
+
+<span class="cmt">// 2. Render page 0 at 2× (Retina)</span>
+<span class="kw">let</span> page   = <span class="kw">try</span> doc.<span class="fn">loadPage</span>(at: <span class="nb">0</span>)
+<span class="kw">let</span> bitmap = page.<span class="fn">render</span>(scale: <span class="nb">2.0</span>)
+imageView.image = bitmap.image
+
+<span class="cmt">// 3. Search for text</span>
+<span class="kw">let</span> hits = page.<span class="fn">search</span>(text: <span class="str">"MuPDF"</span>)
+hits.<span class="fn">forEach</span> { rect <span class="kw">in</span> <span class="fn">highlight</span>(rect) }
+
+<span class="cmt">// 4. Add a highlight annotation</span>
+<span class="kw">let</span> rect  = <span class="ty">MuPDFRect</span>(x: <span class="nb">72</span>, y: <span class="nb">100</span>, width: <span class="nb">200</span>, height: <span class="nb">20</span>)
+<span class="kw">let</span> annot = <span class="kw">try</span> page.<span class="fn">addAnnotation</span>(type: .highlight, rect: rect)
+annot.color = <span class="ty">MuPDFColor</span>(r: <span class="nb">1</span>, g: <span class="nb">1</span>, b: <span class="nb">0</span>, a: <span class="nb">0.5</span>)
+annot.<span class="fn">update</span>()
+
+<span class="cmt">// 5. Save and close</span>
+<span class="kw">try</span> doc.<span class="fn">save</span>(to: <span class="str">"/path/to/output.pdf"</span>)
+doc.<span class="fn">close</span>()</pre>
+      </div>
+
+      <div id="tab-kotlin" class="tab-content">
+<pre><span class="kw">import</span> com.artifex.mupdf.mobile.*
+
+<span class="cmt">// 1. Open a document</span>
+<span class="kw">val</span> doc = <span class="ty">MuPDFDocument</span>.<span class="fn">open</span>(<span class="str">"/path/to/file.pdf"</span>)
+<span class="fn">println</span>(<span class="str">"Pages: ${doc.pageCount}"</span>)
+
+<span class="cmt">// 2. Render page 0 at 2×</span>
+<span class="kw">val</span> page   = doc.<span class="fn">loadPage</span>(<span class="nb">0</span>)
+<span class="kw">val</span> bitmap = page.<span class="fn">render</span>(<span class="nb">2f</span>)
+imageView.<span class="fn">setImageBitmap</span>(bitmap.bitmap)
+
+<span class="cmt">// 3. Search for text</span>
+<span class="kw">val</span> hits = page.<span class="fn">search</span>(<span class="str">"MuPDF"</span>)
+hits.<span class="fn">forEach</span> { rect -> <span class="fn">highlight</span>(rect) }
+
+<span class="cmt">// 4. Add a highlight annotation</span>
+<span class="kw">val</span> rect  = <span class="ty">MuPDFRect</span>(<span class="nb">72f</span>, <span class="nb">100f</span>, <span class="nb">200f</span>, <span class="nb">20f</span>)
+<span class="kw">val</span> annot = page.<span class="fn">addAnnotation</span>(<span class="ty">MuPDFAnnotationType</span>.Highlight, rect)
+annot.color = <span class="ty">MuPDFColor</span>(<span class="nb">1f</span>, <span class="nb">1f</span>, <span class="nb">0f</span>, <span class="nb">0.5f</span>)
+annot.<span class="fn">update</span>()
+
+<span class="cmt">// 5. Save and close</span>
+doc.<span class="fn">save</span>(<span class="str">"/path/to/output.pdf"</span>)
+doc.<span class="fn">close</span>()</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Install ──────────────────────────────────────────────────────────────── -->
+<section id="install">
+  <div class="container">
+    <p class="section-label">Installation</p>
+    <h2 class="section-title">Add to your project in seconds</h2>
+
+    <div class="install-grid">
+      <!-- iOS -->
+      <div class="install-card">
+        <div class="install-card-header">
+          <span style="font-size:1.3rem">🍎</span> iOS — Swift Package Manager
+        </div>
+        <pre><span class="cmt">// Package.swift</span>
+dependencies: [
+  .package(
+    url: <span class="str">"https://github.com/farfromrefug/mupdf-mobile.git"</span>,
+    from: <span class="str">"1.0.0"</span>
+  ),
+]</pre>
+        <div style="padding:1rem 1.5rem; font-size:.85rem; color:var(--text-muted)">
+          Or add via <strong>Xcode → File → Add Packages…</strong>
+        </div>
+      </div>
+
+      <!-- Android -->
+      <div class="install-card">
+        <div class="install-card-header">
+          <span style="font-size:1.3rem">🤖</span> Android — Gradle / Jitpack
+        </div>
+        <pre><span class="cmt">// settings.gradle</span>
+repositories {
+  maven { url <span class="str">'https://jitpack.io'</span> }
+}
+
+<span class="cmt">// app/build.gradle</span>
+dependencies {
+  implementation <span class="str">'com.github.farfromrefug:mupdf-mobile:1.0.0'</span>
+}</pre>
+      </div>
+    </div>
+
+    <div style="margin-top:2rem; padding:1.25rem 1.5rem; background:var(--surface-alt);
+      border:1px solid var(--border); border-radius:var(--radius); font-size:.9rem;">
+      <strong>⚠️ Important:</strong> After adding the package, initialise the MuPDF submodule:
+      <pre style="margin-top:.75rem; border-radius:8px; font-size:.82rem;">git submodule update --init --recursive</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ── API Table ────────────────────────────────────────────────────────────── -->
+<section id="api" class="api-section">
+  <div class="container">
+    <p class="section-label">API Reference</p>
+    <h2 class="section-title">Unified cross-platform API</h2>
+    <p class="section-subtitle">The same class names and method signatures on both platforms.</p>
+
+    <table class="api-table">
+      <thead>
+        <tr>
+          <th>Class</th>
+          <th>iOS</th>
+          <th>Android</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>MuPDFDocument</code></td>
+          <td><span class="badge badge-ios">Swift</span></td>
+          <td><span class="badge badge-android">Kotlin</span></td>
+          <td>Open, save, merge and edit PDF documents</td>
+        </tr>
+        <tr>
+          <td><code>MuPDFPage</code></td>
+          <td><span class="badge badge-ios">Swift</span></td>
+          <td><span class="badge badge-android">Kotlin</span></td>
+          <td>Render, search, and annotate individual pages</td>
+        </tr>
+        <tr>
+          <td><code>MuPDFAnnotation</code></td>
+          <td><span class="badge badge-ios">Swift</span></td>
+          <td><span class="badge badge-android">Kotlin</span></td>
+          <td>Create and edit PDF annotations</td>
+        </tr>
+        <tr>
+          <td><code>MuPDFRenderer</code></td>
+          <td><span class="badge badge-ios">Swift</span></td>
+          <td><span class="badge badge-android">Kotlin</span></td>
+          <td>Utility for full-page and tiled rendering</td>
+        </tr>
+        <tr>
+          <td><code>MuPDFEditor</code></td>
+          <td><span class="badge badge-ios">Swift</span></td>
+          <td><span class="badge badge-android">Kotlin</span></td>
+          <td>Insert images, apply redactions</td>
+        </tr>
+        <tr>
+          <td><code>MuPDFBitmap</code></td>
+          <td><span class="badge badge-ios">UIImage</span></td>
+          <td><span class="badge badge-android">Bitmap</span></td>
+          <td>Platform-native bitmap wrapper</td>
+        </tr>
+        <tr>
+          <td><code>MuPDFRect</code></td>
+          <td><span class="badge badge-ios">Swift</span></td>
+          <td><span class="badge badge-android">Kotlin</span></td>
+          <td>Rectangle value type (x, y, width, height)</td>
+        </tr>
+        <tr>
+          <td><code>MuPDFColor</code></td>
+          <td><span class="badge badge-ios">Swift</span></td>
+          <td><span class="badge badge-android">Kotlin</span></td>
+          <td>RGBA colour value type</td>
+        </tr>
+        <tr>
+          <td><code>MuPDFAnnotationType</code></td>
+          <td><span class="badge badge-ios">enum</span></td>
+          <td><span class="badge badge-android">enum class</span></td>
+          <td>13 annotation types incl. highlight, redact, ink</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── Footer ───────────────────────────────────────────────────────────────── -->
+<footer>
+  <p>
+    Built on <a href="https://mupdf.com/">MuPDF</a> by Artifex Software ·
+    Licensed under <a href="https://www.gnu.org/licenses/agpl-3.0.html">AGPL-3.0</a> ·
+    <a href="https://github.com/farfromrefug/mupdf-mobile">GitHub</a>
+  </p>
+  <p style="margin-top:.5rem; font-size:.8rem; opacity:.6">
+    For commercial licensing, contact <a href="https://artifex.com/licensing/">Artifex</a>.
+  </p>
+</footer>
+
+<script>
+function showTab(id, btn) {
+  // Hide all tab content
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  // Show selected
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

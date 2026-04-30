@@ -1,0 +1,24 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+rootProject.name = "MuPDFMobileDemo"
+include ':app'
+
+// Include the library from the parent android/ directory.
+// In a real project this would be replaced by the Jitpack/Maven dependency.
+include ':mupdf-mobile'
+project(':mupdf-mobile').projectDir = new File('../../android/lib')
