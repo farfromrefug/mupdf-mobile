@@ -241,7 +241,10 @@ open class MuPDFDocument private constructor(
 
         for (line in flat) {
             val parts = line.split("\t", limit = 3)
-            if (parts.size < 3) continue
+            if (parts.size < 3) {
+                android.util.Log.w("MuPDFMobile", "parseOutlineItems: malformed entry '$line', skipping")
+                continue
+            }
             val depth = parts[0].toIntOrNull() ?: 0
             val title = parts[1]
             val pageIndex = parts[2].toIntOrNull() ?: -1

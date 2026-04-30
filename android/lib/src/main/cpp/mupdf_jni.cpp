@@ -633,6 +633,7 @@ Java_com_artifex_mupdf_mobile_MuPDFPage_nativeSearch(
     std::string text = jstringToString(env, jtext);
     if (text.empty()) return env->NewFloatArray(0);
 
+    // Up to 256 result quads per search; sufficient for typical documents.
     static constexpr int MAX_QUADS = 256;
     fz_quad quads[MAX_QUADS];
     int nhits = 0;
@@ -719,7 +720,8 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_artifex_mupdf_mobile_MuPDFAnnotation_nativeUpdateAnnotation(
         JNIEnv *env, jclass /*clazz*/, jlong annotHandle,
         jfloat x0, jfloat y0, jfloat x1, jfloat y1,
-        jfloat r, jfloat g, jfloat b, jfloat /*a*/,
+        jfloat r, jfloat g, jfloat b,
+        jfloat /*a_unused — MuPDF annot color has no alpha; opacity param is used instead*/,
         jfloat opacity, jstring jcontents) {
     if (annotHandle == -1L) return;
 #ifdef MUPDF_AVAILABLE
