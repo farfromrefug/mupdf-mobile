@@ -1,0 +1,73 @@
+# ─── macOS ───────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# ─── Xcode ───────────────────────────────────────────────────────────────────
+*.xcworkspace/
+!*.xcodeproj/project.xcworkspace/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+build/
+
+# ─── Swift Package Manager ───────────────────────────────────────────────────
+.build/
+.swiftpm/
+*.resolved
+Packages/
+
+# ─── Android / Gradle ────────────────────────────────────────────────────────
+*.iml
+.gradle/
+local.properties
+.idea/
+*/build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+android/local.properties
+android/.gradle/
+android/*/build/
+
+# ─── CMake / C++ ─────────────────────────────────────────────────────────────
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.o
+*.a
+*.so
+*.dylib
+
+# ─── MuPDF submodule build artefacts ─────────────────────────────────────────
+mupdf/build/
+mupdf/generated/
+
+# ─── Scripts ─────────────────────────────────────────────────────────────────
+scripts/*.log
+
+# ─── Docs ─────────────────────────────────────────────────────────────────────
+docs/node_modules/
+
+# ─── Editor ──────────────────────────────────────────────────────────────────
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─── Environment ─────────────────────────────────────────────────────────────
+.env
+.env.local
+docs-dist/

@@ -1,0 +1,162 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
+    id 'org.jetbrains.dokka'
+}
+
+android {
+    namespace 'com.artifex.mupdf.mobile'
+    compileSdkVersion 36
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 36
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17"
+                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Optional: build MuPDF for Android using ndk-build
+// Run this manually or via: ./gradlew buildMuPDF
+// Requires: git submodule update --init --recursive
+// ─────────────────────────────────────────────────────────────────────────────
+def mupdfRoot = file("${rootProject.projectDir}/../mupdf")
+def mupdfBuildOut = file("${buildDir}/mupdf_android")
+
+tasks.register('buildMuPDF', Exec) {
+    description = 'Builds MuPDF for Android using ndk-build (requires NDK + submodule)'
+    group = 'build'
+
+    def ndkDir = android.ndkDirectory
+    def abis = android.defaultConfig.externalNativeBuild.cmake.abiFilters.join(' ')
+
+    onlyIf {
+        def headers = new File("${mupdfRoot}/include/mupdf/fitz.h")
+        def ndkBuild = new File("${ndkDir}/ndk-build")
+        headers.exists() && ndkBuild.exists()
+    }
+
+    workingDir mupdfRoot
+    commandLine "${ndkDir}/ndk-build",
+        "APP_BUILD_SCRIPT=${mupdfRoot}/platform/java/Android.mk",
+        "APP_PROJECT_DIR=${mupdfBuildOut}",
+        "APP_PLATFORM=android-21",
+        "APP_ABI=${abis}",
+        "APP_OPTIM=release",
+        "NDK_PROJECT_PATH=${mupdfBuildOut}"
+
+    doFirst {
+        mupdfBuildOut.mkdirs()
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.7.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.2.1'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dokka — HTML API documentation
+// ─────────────────────────────────────────────────────────────────────────────
+tasks.dokkaHtml {
+    outputDirectory.set(rootProject.file("../docs/api/android"))
+    dokkaSourceSets {
+        named("main") {
+            moduleName.set("MuPDF Mobile Android")
+            includeNonPublic.set(false)
+            skipEmptyPackages.set(true)
+            sourceLink {
+                localDirectory.set(file("src/main/kotlin"))
+                remoteUrl.set(
+                    new URL("https://github.com/farfromrefug/mupdf-mobile/blob/main/android/lib/src/main/kotlin")
+                )
+                remoteLineSuffix.set("#L")
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Jitpack / Maven publishing
+// ─────────────────────────────────────────────────────────────────────────────
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId    = 'com.github.farfromrefug'
+                artifactId = 'mupdf-mobile'
+                version    = '1.0.0'
+
+                pom {
+                    name        = 'MuPDF Mobile'
+                    description = 'Cross-platform MuPDF wrapper for iOS and Android'
+                    url         = 'https://github.com/farfromrefug/mupdf-mobile'
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url  = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id   = 'farfromrefug'
+                            name = 'Martin Guillon'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:github.com/farfromrefug/mupdf-mobile.git'
+                        url        = 'https://github.com/farfromrefug/mupdf-mobile'
+                    }
+                }
+            }
+        }
+    }
+}
