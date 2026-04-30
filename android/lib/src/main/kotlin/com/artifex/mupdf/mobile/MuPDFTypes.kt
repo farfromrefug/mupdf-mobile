@@ -91,19 +91,19 @@ enum class MuPDFAnnotationType(val pdfAnnotValue: Int, val displayName: String) 
     /** Ellipse / circle shape. */
     Circle(5, "Circle"),
     /** Free-hand ink drawing. */
-    Ink(14, "Ink"),
+    Ink(15, "Ink"),
     /** Yellow highlight over text. */
-    Highlight(15, "Highlight"),
+    Highlight(8, "Highlight"),
     /** Underline beneath text. */
-    Underline(16, "Underline"),
+    Underline(9, "Underline"),
     /** Squiggly underline. */
-    Squiggly(17, "Squiggly"),
+    Squiggly(10, "Squiggly"),
     /** Strikethrough over text. */
-    StrikeOut(18, "StrikeOut"),
+    StrikeOut(11, "StrikeOut"),
     /** Stamp annotation (e.g. "APPROVED"). */
-    Stamp(20, "Stamp"),
+    Stamp(13, "Stamp"),
     /** Redaction mark. Content is removed after [MuPDFEditor.applyRedactions]. */
-    Redact(24, "Redact");
+    Redact(12, "Redact");
 
     companion object {
         /** Returns the [MuPDFAnnotationType] for the given [pdfAnnotValue], or `null`. */

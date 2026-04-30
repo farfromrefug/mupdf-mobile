@@ -19,8 +19,8 @@ open class MuPDFPage internal constructor(
     val width: Float,
     /** Height of the page in PDF points. */
     val height: Float,
-    /** Opaque pointer to the native `fz_page`. */
-    private var nativeHandle: Long
+    /** Opaque pointer to the native `PageHandle`. */
+    internal var nativeHandle: Long
 ) : AutoCloseable {
 
     private var closed = false
@@ -52,13 +52,13 @@ open class MuPDFPage internal constructor(
     open fun render(width: Int, height: Int): MuPDFBitmap {
         checkNotClosed()
         require(width > 0 && height > 0) { "Dimensions must be positive" }
-
-        // TODO: (requires mupdf submodule)
-        //   val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        //   nativeRender(nativeHandle, bmp, width.toFloat() / this.width, 0, 0, width, height)
-        //   return MuPDFBitmap(bmp)
-
-        return MuPDFBitmap.blank(width, height)
+        val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        if (nativeHandle != -1L) {
+            nativeRender(nativeHandle, bmp, width.toFloat() / this.width, 0, 0, width, height)
+        } else {
+            bmp.eraseColor(android.graphics.Color.WHITE)
+        }
+        return MuPDFBitmap(bmp)
     }
 
     /**
@@ -76,13 +76,13 @@ open class MuPDFPage internal constructor(
     open fun renderTile(x: Int, y: Int, tileWidth: Int, tileHeight: Int, scale: Float): MuPDFBitmap {
         checkNotClosed()
         require(tileWidth > 0 && tileHeight > 0) { "Tile dimensions must be positive" }
-
-        // TODO: (requires mupdf submodule)
-        //   val bmp = Bitmap.createBitmap(tileWidth, tileHeight, Bitmap.Config.ARGB_8888)
-        //   nativeRender(nativeHandle, bmp, scale, x, y, tileWidth, tileHeight)
-        //   return MuPDFBitmap(bmp)
-
-        return MuPDFBitmap.blank(tileWidth, tileHeight)
+        val bmp = Bitmap.createBitmap(tileWidth, tileHeight, Bitmap.Config.ARGB_8888)
+        if (nativeHandle != -1L) {
+            nativeRender(nativeHandle, bmp, scale, x, y, tileWidth, tileHeight)
+        } else {
+            bmp.eraseColor(android.graphics.Color.WHITE)
+        }
+        return MuPDFBitmap(bmp)
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -94,8 +94,19 @@ open class MuPDFPage internal constructor(
      */
     open fun annotations(): List<MuPDFAnnotation> {
         checkNotClosed()
-        // TODO: return nativeGetAnnotations(nativeHandle).map { ... }
-        return emptyList()
+        if (nativeHandle == -1L) return emptyList()
+        val handles = nativeGetAnnotations(nativeHandle)
+        return handles.map { handle ->
+            val typeVal = MuPDFAnnotation.nativeGetAnnotationType(handle)
+            val type = MuPDFAnnotationType.fromPdfAnnotValue(typeVal) ?: MuPDFAnnotationType.Text
+            val rectArr = MuPDFAnnotation.nativeGetAnnotationRect(handle)
+            val rect = MuPDFRect(rectArr[0], rectArr[1],
+                                 rectArr[2] - rectArr[0], rectArr[3] - rectArr[1])
+            val colorArr = MuPDFAnnotation.nativeGetAnnotationColor(handle)
+            val color = MuPDFColor(colorArr[0], colorArr[1], colorArr[2], colorArr[3])
+            val contents = MuPDFAnnotation.nativeGetAnnotationContents(handle) ?: ""
+            MuPDFAnnotation(type, rect, color, colorArr[3], contents, handle, this)
+        }
     }
 
     /**
@@ -109,13 +120,11 @@ open class MuPDFPage internal constructor(
     @Throws(MuPDFAnnotationException::class)
     open fun addAnnotation(type: MuPDFAnnotationType, rect: MuPDFRect): MuPDFAnnotation {
         checkNotClosed()
-        // TODO: (requires mupdf submodule)
-        //   val handle = nativeAddAnnotation(nativeHandle, type.pdfAnnotValue,
-        //                                    rect.x, rect.y,
-        //                                    rect.x + rect.width, rect.y + rect.height)
-        //   if (handle == -1L) throw MuPDFAnnotationException("Failed to add annotation")
-        //   return MuPDFAnnotation(type, rect, nativeHandle = handle, page = this)
-        return MuPDFAnnotation(type, rect, page = this)
+        val handle = nativeAddAnnotation(nativeHandle, type.pdfAnnotValue,
+                                         rect.x, rect.y,
+                                         rect.x + rect.width, rect.y + rect.height)
+        if (handle == -1L) throw MuPDFAnnotationException("Failed to add annotation")
+        return MuPDFAnnotation(type, rect, nativeHandle = handle, page = this)
     }
 
     /**
@@ -127,10 +136,10 @@ open class MuPDFPage internal constructor(
     @Throws(MuPDFAnnotationException::class)
     open fun removeAnnotation(annotation: MuPDFAnnotation) {
         checkNotClosed()
-        // TODO: (requires mupdf submodule)
-        //   if (!nativeRemoveAnnotation(nativeHandle, annotation.nativeHandle)) {
-        //       throw MuPDFAnnotationException("Failed to remove annotation")
-        //   }
+        if (nativeHandle == -1L || annotation.nativeHandle == -1L) return
+        if (!nativeRemoveAnnotation(nativeHandle, annotation.nativeHandle)) {
+            throw MuPDFAnnotationException("Failed to remove annotation")
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -144,9 +153,16 @@ open class MuPDFPage internal constructor(
      */
     open fun search(text: String): List<MuPDFRect> {
         checkNotClosed()
-        if (text.isEmpty()) return emptyList()
-        // TODO: return nativeSearch(nativeHandle, text).toList()
-        return emptyList()
+        if (text.isEmpty() || nativeHandle == -1L) return emptyList()
+        val floats = nativeSearch(nativeHandle, text)
+        val result = mutableListOf<MuPDFRect>()
+        var i = 0
+        while (i + 3 < floats.size) {
+            result.add(MuPDFRect(floats[i], floats[i + 1],
+                                 floats[i + 2] - floats[i], floats[i + 3] - floats[i + 1]))
+            i += 4
+        }
+        return result
     }
 
     /**
@@ -155,8 +171,8 @@ open class MuPDFPage internal constructor(
     open val textContent: String
         get() {
             checkNotClosed()
-            // TODO: return nativeGetTextContent(nativeHandle) ?: ""
-            return ""
+            if (nativeHandle == -1L) return ""
+            return nativeGetTextContent(nativeHandle) ?: ""
         }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -168,7 +184,7 @@ open class MuPDFPage internal constructor(
         if (closed) return
         closed = true
         if (nativeHandle != -1L) {
-            // TODO: nativeClosePage(nativeHandle)
+            nativeClosePage(nativeHandle)
             nativeHandle = -1L
         }
     }

@@ -19,7 +19,7 @@ open class MuPDFAnnotation internal constructor(
     var color: MuPDFColor = MuPDFColor.HighlightYellow,
     var opacity: Float = 1f,
     var contents: String = "",
-    /** Opaque handle to the native `pdf_annot *`. -1 means not yet backed by native. */
+    /** Opaque handle to the native `AnnotHandle *`. -1 means not yet backed by native. */
     internal val nativeHandle: Long = -1L,
     internal val page: MuPDFPage? = null
 ) {
@@ -36,22 +36,19 @@ open class MuPDFAnnotation internal constructor(
      */
     open fun update() {
         if (nativeHandle == -1L) return
-        // Delegate to the JNI bridge.
-        // TODO: (requires mupdf submodule)
-        // nativeUpdateAnnotation(
-        //     nativeHandle,
-        //     rect.x, rect.y, rect.x + rect.width, rect.y + rect.height,
-        //     color.r, color.g, color.b, color.a,
-        //     opacity,
-        //     contents
-        // )
+        nativeUpdateAnnotation(
+            nativeHandle,
+            rect.x, rect.y, rect.x + rect.width, rect.y + rect.height,
+            color.r, color.g, color.b, color.a,
+            opacity,
+            contents
+        )
     }
 
     override fun toString(): String =
         "MuPDFAnnotation(type=${type.displayName}, rect=$rect, opacity=$opacity)"
 
     companion object {
-        // JNI bridge — called from update()
         @JvmStatic
         private external fun nativeUpdateAnnotation(
             nativeHandle: Long,
@@ -60,5 +57,25 @@ open class MuPDFAnnotation internal constructor(
             opacity: Float,
             contents: String
         )
+
+        /** Returns the PDF_ANNOT_* enum value for the given handle. */
+        @JvmStatic
+        internal external fun nativeGetAnnotationType(annotHandle: Long): Int
+
+        /** Returns [x0, y0, x1, y1] of the annotation's bounding rectangle. */
+        @JvmStatic
+        internal external fun nativeGetAnnotationRect(annotHandle: Long): FloatArray
+
+        /** Returns [r, g, b, opacity] for the annotation colour. */
+        @JvmStatic
+        internal external fun nativeGetAnnotationColor(annotHandle: Long): FloatArray
+
+        /** Returns the annotation's text contents, or empty string. */
+        @JvmStatic
+        internal external fun nativeGetAnnotationContents(annotHandle: Long): String?
+
+        /** Releases the native AnnotHandle. */
+        @JvmStatic
+        internal external fun nativeDropAnnotation(annotHandle: Long)
     }
 }

@@ -26,8 +26,8 @@ import java.io.File
  * ```
  */
 open class MuPDFDocument private constructor(
-    /** Opaque pointer to the native `fz_document`. */
-    private var nativeHandle: Long
+    /** Opaque pointer to the native `DocHandle`. */
+    internal var nativeHandle: Long
 ) : AutoCloseable {
 
     private var closed = false
@@ -52,11 +52,9 @@ open class MuPDFDocument private constructor(
         @Throws(MuPDFFileNotFoundException::class, MuPDFInvalidDocumentException::class)
         fun open(path: String): MuPDFDocument {
             if (!File(path).exists()) throw MuPDFFileNotFoundException(path)
-            // TODO: (requires mupdf submodule)
-            //   val handle = nativeOpen(path)
-            //   if (handle == -1L) throw MuPDFInvalidDocumentException()
-            //   return MuPDFDocument(handle)
-            return MuPDFDocument(-1L)
+            val handle = nativeOpen(path)
+            if (handle == -1L) throw MuPDFInvalidDocumentException()
+            return MuPDFDocument(handle)
         }
 
         /**
@@ -69,11 +67,9 @@ open class MuPDFDocument private constructor(
         @Throws(MuPDFInvalidDocumentException::class)
         fun open(data: ByteArray): MuPDFDocument {
             if (data.isEmpty()) throw MuPDFInvalidDocumentException()
-            // TODO: (requires mupdf submodule)
-            //   val handle = nativeOpenFromBytes(data)
-            //   if (handle == -1L) throw MuPDFInvalidDocumentException()
-            //   return MuPDFDocument(handle)
-            return MuPDFDocument(-1L)
+            val handle = nativeOpenFromBytes(data)
+            if (handle == -1L) throw MuPDFInvalidDocumentException()
+            return MuPDFDocument(handle)
         }
 
         // JNI bridge
@@ -89,7 +85,7 @@ open class MuPDFDocument private constructor(
         @JvmStatic private external fun nativeDeletePage(docHandle: Long, index: Int)
         @JvmStatic private external fun nativeGetMetadata(docHandle: Long, key: String): String?
         @JvmStatic private external fun nativeClose(docHandle: Long)
-        @JvmStatic private external fun nativeGetOutline(docHandle: Long): Array<Any>
+        @JvmStatic private external fun nativeGetOutline(docHandle: Long): Array<String>
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -138,13 +134,11 @@ open class MuPDFDocument private constructor(
         if (index < 0 || index >= count) {
             throw MuPDFPageOutOfBoundsException(index, count)
         }
-        // TODO: (requires mupdf submodule)
-        //   val pageHandle = nativeLoadPage(nativeHandle, index)
-        //   if (pageHandle == -1L) throw MuPDFEngineException("Failed to load page $index")
-        //   val w = nativeGetPageWidth(nativeHandle, index)
-        //   val h = nativeGetPageHeight(nativeHandle, index)
-        //   return MuPDFPage(index, w, h, pageHandle)
-        return MuPDFPage(index, 595f, 842f, -1L)
+        val pageHandle = nativeLoadPage(nativeHandle, index)
+        if (pageHandle == -1L) throw MuPDFEngineException("Failed to load page $index")
+        val w = nativeGetPageWidth(nativeHandle, index)
+        val h = nativeGetPageHeight(nativeHandle, index)
+        return MuPDFPage(index, w, h, pageHandle)
     }
 
     /**
@@ -233,9 +227,40 @@ open class MuPDFDocument private constructor(
      */
     open fun outline(): List<MuPDFOutlineItem> {
         checkNotClosed()
-        // TODO: (requires mupdf submodule)
-        //   return nativeGetOutline(nativeHandle).toOutlineTree()
-        return emptyList()
+        if (nativeHandle == -1L) return emptyList()
+        val flat = nativeGetOutline(nativeHandle)
+        return parseOutlineItems(flat)
+    }
+
+    private fun parseOutlineItems(flat: Array<String>): List<MuPDFOutlineItem> {
+        if (flat.isEmpty()) return emptyList()
+        // Stack-based DFS reconstruction from the flat depth-annotated list.
+        data class Entry(val depth: Int, val item: MuPDFOutlineItem, val children: MutableList<MuPDFOutlineItem>)
+        val stack = mutableListOf<Entry>()
+        val roots = mutableListOf<MuPDFOutlineItem>()
+
+        for (line in flat) {
+            val parts = line.split("\t", limit = 3)
+            if (parts.size < 3) continue
+            val depth = parts[0].toIntOrNull() ?: 0
+            val title = parts[1]
+            val pageIndex = parts[2].toIntOrNull() ?: -1
+            val children = mutableListOf<MuPDFOutlineItem>()
+            val item = MuPDFOutlineItem(title, pageIndex, children)
+            val entry = Entry(depth, item, children)
+
+            // Pop stack back to the parent level.
+            while (stack.isNotEmpty() && stack.last().depth >= depth) {
+                stack.removeLast()
+            }
+            if (stack.isEmpty()) {
+                roots.add(item)
+            } else {
+                stack.last().children.add(item)
+            }
+            stack.add(entry)
+        }
+        return roots
     }
 
     // ─────────────────────────────────────────────────────────────────────────

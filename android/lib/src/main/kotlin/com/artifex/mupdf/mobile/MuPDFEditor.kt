@@ -46,11 +46,10 @@ open class MuPDFEditor(val document: MuPDFDocument) {
     @Throws(MuPDFDocumentClosedException::class, MuPDFEngineException::class)
     open fun insertImage(page: MuPDFPage, image: ByteArray, rect: MuPDFRect) {
         require(image.isNotEmpty()) { "image bytes must not be empty" }
-        // TODO: (requires mupdf submodule)
-        //   val ok = nativeInsertImage(document.nativeHandle, page.nativeHandle,
-        //                              image, rect.x, rect.y,
-        //                              rect.x + rect.width, rect.y + rect.height)
-        //   if (!ok) throw MuPDFEngineException("insertImage failed")
+        val ok = nativeInsertImage(document.nativeHandle, page.nativeHandle,
+                                   image, rect.x, rect.y,
+                                   rect.x + rect.width, rect.y + rect.height)
+        if (!ok) throw MuPDFEngineException("insertImage failed")
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -82,9 +81,8 @@ open class MuPDFEditor(val document: MuPDFDocument) {
      */
     @Throws(MuPDFDocumentClosedException::class, MuPDFEngineException::class)
     open fun applyRedactions() {
-        // TODO: (requires mupdf submodule)
-        //   val ok = nativeApplyRedactions(document.nativeHandle)
-        //   if (!ok) throw MuPDFEngineException("applyRedactions failed")
+        val ok = nativeApplyRedactions(document.nativeHandle)
+        if (!ok) throw MuPDFEngineException("applyRedactions failed")
     }
 
     // ─────────────────────────────────────────────────────────────────────────
